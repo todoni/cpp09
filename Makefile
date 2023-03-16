@@ -1,6 +1,6 @@
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -MD -g
 NAME = btc
-SRCS = main.cpp BitcoinExchange.cpp
+SRCS = main.cpp BitcoinExchange.cpp Date.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 all : $(NAME)

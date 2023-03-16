@@ -2,31 +2,27 @@
 # define BITCOINEXCHANGE_HPP
 
 # include <map>
-# include <list>
 # include <string>
-# include <ostream>
-# include <istream>
 # include <fstream>
 
-typedef std::map<std::string, float> data;
-typedef std::list<std::pair<std::string, float> > input;
+# include "Date.hpp"
 
-class   BitcoinExchange {
+typedef std::map<Date, float> data;
 
+class   BitcoinExchange
+{
 private:
+    data database;
+    BitcoinExchange();
     BitcoinExchange(const BitcoinExchange &ref);
-    BitcoinExchange &operator=(const BitcoinExchange &ref);
+    BitcoinExchange& operator=(const BitcoinExchange &ref);
 
 public:
-    data database;
-    input input_list;
-    BitcoinExchange();
     ~BitcoinExchange();
-    BitcoinExchange(std::ifstream& rawDatabase , std::ifstream& rawInput);
-    std::list<float> calculate() const;
-    
-};
+    BitcoinExchange(std::ifstream& rawDatabase);
+    float getExchangeRateOftheday(Date date);
+    void doExchange(std::string rawInput);
 
-std::ostream &operator<<(std::ostream &out, const BitcoinExchange& btc);
+};
 
 #endif

@@ -1,65 +1,121 @@
 #include "BitcoinExchange.hpp"
+#include "IndexableList.hpp"
+#include <sstream>
+#include <iostream>
 
-const std::string WHITESPACE = " \n\r\t\f\v";
-
-std::string ltrim(const std::string &s)
+IndexableList<std::string> split(std::string str, char sep)
 {
-    size_t start = s.find_first_not_of(WHITESPACE);
-    return (start == std::string::npos) ? "" : s.substr(start);
+    std::istringstream iss(str);
+    std::string buffer;
+
+    IndexableList<std::string> result;
+
+    while (std::getline(iss, buffer, sep))
+        result.push_back(buffer);
+    return (result);
 }
 
-std::string rtrim(const std::string &s)
+bool is_leap_year(int year)
 {
-    size_t end = s.find_last_not_of(WHITESPACE);
-    return (end == std::string::npos) ? "" : s.substr(0, end + 1);
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
 }
 
-std::string trim(const std::string &s)
+bool is_valid_date(int year, int month, int day)
 {
-    return rtrim(ltrim(s));
+    if (month < 1 || month > 12)
+    {
+        return false;
+    }
+    if (day < 1)
+    {
+        return false;
+    }
+    if (month == 2)
+    {
+        if (is_leap_year(year))
+        {
+            return day <= 29;
+        }
+        else
+        {
+            return day <= 28;
+        }
+    }
+    else if (month == 4 || month == 6 || month == 9 || month == 11)
+    {
+        return day <= 30;
+    }
+    else
+    {
+        return day <= 31;
+    }
 }
 
-BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase, std::ifstream& rawInput)
+BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase)
 {
     while (!rawDatabase.eof())
     {
         std::string date;
-        std::string value;
+        std::string price;
         getline(rawDatabase, date, ',');
-        getline(rawDatabase, value, '\n');
-        database[date] = std::stof(value);
-    }
-
-    while (!rawInput.eof())
-    {
-        std::string date;
-        std::string value;
-        getline(rawInput, date, '|');
-        getline(rawInput, value, '\n');
-        input_list.push_back(std::make_pair(trim(date), std::stof(trim(value))));
+        getline(rawDatabase, price, '\n');
+        
+        IndexableList<std::string> yearMonthDay = split(date, '-');
+        if (yearMonthDay.size() == 3)
+        {
+            database[Date(std::atoi(yearMonthDay[0].c_str()), std::atoi(yearMonthDay[1].c_str()), std::atoi(yearMonthDay[2].c_str()))] = static_cast<float>(std::atof(price.c_str()));
+        }
     }
 }
-BitcoinExchange::BitcoinExchange() {}
+
 BitcoinExchange::~BitcoinExchange() {}
 
-std::list<float> BitcoinExchange::calculate() const
+void    BitcoinExchange::doExchange(std::string rawInput)
 {
-    std::list<float> result;
-    std::list<std::pair<std::string, float> >::const_iterator it = input_list.begin();
-    
-    for(;it != input_list.end();++it)
-        result.push_back(database.find(it->first)->second * it->second);
-
-    return result;
-}
-
-std::ostream& operator<<(std::ostream& out, const BitcoinExchange& btc)
-{
-    std::list<float> result = btc.calculate();
-    std::list<float>::iterator it = result.begin();
-    
-    for (;it != result.end(); ++it)
-        out << *it;
-    
-    return out;
+    if (rawInput.empty())
+    {
+        return ;
+    }
+    IndexableList<std::string> dateValue = split(rawInput, '|');
+    if (dateValue.size() != 2)
+    {
+        std::cout << "Error: " << rawInput << " : Bad Input" << std::endl;
+        return ;
+    }
+    IndexableList<std::string> date = split(dateValue[0], '-');
+    int year = -1;
+    int month = -1;
+    int day = -1;
+    float quantity = -1;
+    if (date.size() == 3)
+    {
+        year = std::atoi(date[0].c_str());
+        month = std::atoi(date[1].c_str());
+        day = std::atoi(date[2].c_str());
+        quantity = static_cast<float>(std::atof(dateValue[1].c_str()));
+    }
+    if (year == -1 && month == -1 && day == -1 && quantity == -1)
+    {
+        return ;
+    }
+    Date targetDate(year, month, day);
+    if (!is_valid_date(year, month, day))
+    {
+        std::cout << "Error: " << targetDate << ": Invalid Date" << std::endl;
+    }
+    else if (quantity < 0)
+    {
+        std::cout << "Error:" << quantity << ": Number must be positive" << std::endl;
+    }
+    else if (quantity > 1000)
+    {
+        std::cout << "Error:" << quantity << ": Number too big" << std::endl;
+    }
+    else
+    {
+        std::map<Date, float>::const_iterator price = database.upper_bound(targetDate);
+        if (price != database.begin())
+            --price;
+        std::cout << "Date: " << targetDate << "\nPrice: " << price->second << " Quantity: " << quantity << " => " << price->second * quantity << std::endl;
+    }
 }

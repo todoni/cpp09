@@ -5,21 +5,22 @@
 
 int main(int argc, char** argv)
 {
-    if (argc != 2)
+    if (argc != 2 || !argv[1])
         return (1);
 
     std::ifstream rawInput;
     std::ifstream rawDatabase;
 
-    rawInput.clear();
-    rawDatabase.clear();
+    //rawInput.clear();
+    //rawDatabase.clear();
 
     rawInput.open(argv[1]);
     if (rawInput.fail())
+    {
         std::cerr << "input error" << std::endl;
         rawInput.close();
-    return (1);
-
+        return (1);
+    }
     rawDatabase.open("data.csv");
     if (rawDatabase.fail())
     {   
@@ -29,7 +30,7 @@ int main(int argc, char** argv)
     }
 
     
-    BitcoinExchange btc(rawDatabase, rawInput);
+    BitcoinExchange btc(rawDatabase);
     
     /*while (!rawDatabase.eof())
     {
@@ -38,16 +39,16 @@ int main(int argc, char** argv)
         getline(rawDatabase, date, ',');
         getline(rawDatabase, value, '\n');
         btc.database[date] = std::stof(value);
-    }
+    }*/
 
     while (!rawInput.eof())
     {
-        std::string date;
-        std::string value;
-        getline(rawInput, date, '|');
-        getline(rawInput, value, '\n');
-        btc.input_list.push_back(std::make_pair(trim(date), std::stof(trim(value))));
-    }*/
-
-        std::cout << btc << std::endl;
+        std::string dateValue;
+        getline(rawInput, dateValue, '\n');
+        btc.doExchange(dateValue);
+    }
+    //std::map<Date, float>::iterator it = btc.database.begin();
+    //for (; it != btc.database.end(); ++it)
+    //    std::cout << it->first  << std::endl;
+    //std::cout << btc << std::endl;
     }
