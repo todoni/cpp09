@@ -5,7 +5,7 @@ int main(int argc, char **argv)
 {
     if (argc != 2)
     {
-        std::cout << "input need" << std::endl;
+        std::cout << "Usage: ./RPN [expression]" << std::endl;
         return (1);
     }
 

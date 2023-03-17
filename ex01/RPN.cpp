@@ -1,65 +1,58 @@
 #include "RPN.hpp"
-#include <sstream>
-#include <iostream>
 
 RPN::RPN() {}
 
 RPN::~RPN() {}
 
-std::string numToString(long num)
+bool RPN::isOperator(const char& token) const
 {
-    std::ostringstream oss;
-    oss << num;
-    return oss.str();
-}
-
-bool RPN::isOperator(const std::string &token) const
-{
-    if (token != "*" && token != "/" && token != "-" && token != "+")
+    if (token != '+' && token != '-' && token != '/' && token != '*')
         return false;
     return true;
 }
 
-bool RPN::isValidNumber(const std::string& token, long number) const
+long RPN::calculate(std::string expression)
 {
-    return (numToString(number) == token);
-}
-
-long RPN::calculate(const std::string& expression)
-{
-    std::istringstream iss(expression);
-    std::string token;
-
-    while (std::getline(iss, token, ' '))
+    for (std::string::iterator token = expression.begin(); token != expression.end(); ++token)
     {
-        long number = std::atoi(token.c_str());
-
-        if (!isValidNumber(token, number) && !isOperator(token))
-            throw std::invalid_argument("Error");
-        
-        if (isOperator(token))
+        if (std::isdigit(*token))
+        {
+            int operand = *token - 48;
+            calculateStack.push(operand);
+        }
+        else if (isOperator(*token)) 
         {
             if (calculateStack.size() < 2)
-                throw std::invalid_argument("Error");
+                throw std::runtime_error("Error");
             
             long a = calculateStack.top();
             calculateStack.pop();
             long b = calculateStack.top();
             calculateStack.pop();
 
-            if (token == "+")
+            if (*token == '+')
                 calculateStack.push(b + a);
-            else if (token == "-")
+            else if (*token == '-')
                 calculateStack.push(b - a);
-            else if (token == "/")
+            else if (*token == '/')
+            {
+                if (a == 0)
+                {
+                    throw std::runtime_error("Error");
+                }
                 calculateStack.push(b / a);
-            else if (token == "*")
+            }
+            else if (*token == '*')
                 calculateStack.push(b * a);
+        }
+        else if (*token == ' ')
+        {
+
         }
         else
         {
-            calculateStack.push(number);
-        }    
+            throw std::invalid_argument("Error");
+        }
     }
     if (calculateStack.size() != 1)
         throw std::runtime_error("Error");
