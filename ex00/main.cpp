@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     
     BitcoinExchange btc(rawDatabase);
     
-    while (!rawInput.eof())
+        while (!rawInput.eof())
     {
         std::string dateValue;
         getline(rawInput, dateValue, '\n');
