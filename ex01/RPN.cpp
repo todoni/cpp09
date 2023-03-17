@@ -6,9 +6,7 @@ RPN::~RPN() {}
 
 bool RPN::isOperator(const char& token) const
 {
-    if (token != '+' && token != '-' && token != '/' && token != '*')
-        return false;
-    return true;
+    return (token == '+' || token == '-' || token == '/' || token == '*');
 }
 
 long RPN::calculate(std::string expression)
@@ -17,7 +15,7 @@ long RPN::calculate(std::string expression)
     {
         if (std::isdigit(*token))
         {
-            int operand = *token - 48;
+            int operand = *token - '0';
             calculateStack.push(operand);
         }
         else if (isOperator(*token)) 
