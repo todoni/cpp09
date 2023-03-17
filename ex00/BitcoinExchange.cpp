@@ -1,14 +1,14 @@
 #include "BitcoinExchange.hpp"
-#include "IndexableList.hpp"
+#include <vector>
 #include <sstream>
 #include <iostream>
 
-IndexableList<std::string> split(std::string str, char sep)
+std::vector<std::string> split(std::string str, char sep)
 {
     std::istringstream iss(str);
     std::string buffer;
 
-    IndexableList<std::string> result;
+    std::vector<std::string> result;
 
     while (std::getline(iss, buffer, sep))
         result.push_back(buffer);
@@ -60,7 +60,7 @@ BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase)
         getline(rawDatabase, date, ',');
         getline(rawDatabase, price, '\n');
         
-        IndexableList<std::string> yearMonthDay = split(date, '-');
+        std::vector<std::string> yearMonthDay = split(date, '-');
         if (yearMonthDay.size() == 3)
         {
             database[Date(std::atoi(yearMonthDay[0].c_str()), std::atoi(yearMonthDay[1].c_str()), std::atoi(yearMonthDay[2].c_str()))] = static_cast<float>(std::atof(price.c_str()));
@@ -76,13 +76,13 @@ void    BitcoinExchange::doExchange(std::string rawInput)
     {
         return ;
     }
-    IndexableList<std::string> dateValue = split(rawInput, '|');
+    std::vector<std::string> dateValue = split(rawInput, '|');
     if (dateValue.size() != 2)
     {
         std::cout << "Error: " << rawInput << " : Bad Input" << std::endl;
         return ;
     }
-    IndexableList<std::string> date = split(dateValue[0], '-');
+    std::vector<std::string> date = split(dateValue[0], '-');
     int year = -1;
     int month = -1;
     int day = -1;
