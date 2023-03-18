@@ -8,7 +8,7 @@ class IndexableList : public std::list<T>
 {
 public:
     IndexableList() : std::list<T>() {}
-    IndexableList(size_t n) : std::list<T>(n) {}
+    IndexableList(typename std::list<T>::size_type n) : std::list<T>(n) {}
     ~IndexableList() {}
     IndexableList(const IndexableList &other) : std::list<T>(other) {}
     IndexableList &operator=(const IndexableList &other)
@@ -19,7 +19,7 @@ public:
         }
         return (*this);
     }
-    T &operator[](int index)
+    T &operator[](typename std::list<T>::size_type index)
     {
         typename std::list<T>::iterator it = this->begin();
         std::advance(it, index);

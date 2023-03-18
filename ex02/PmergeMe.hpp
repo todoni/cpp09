@@ -32,6 +32,8 @@ public:
     PmergeMe() {}
     ~PmergeMe() {}
 private: 
+    PmergeMe(const PmergeMe& other);
+    PmergeMe& operator=(const PmergeMe& other);
     void mergeInsertionSort(int left, int right)
     {
         if (left >= right)
