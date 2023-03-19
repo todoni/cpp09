@@ -2,6 +2,7 @@
 #include "IndexableList.hpp"
 
 #include <deque>
+#include <vector>
 #include <time.h>
 
 std::string numToString(int num)
@@ -48,27 +49,34 @@ int main(int argc, char **argv)
     std::cout << std::endl;
 
     clock_t start = clock();
-    PmergeMe<IndexableList<int> > merge_insertion_sort;
-    merge_insertion_sort.insertData(data);
-    merge_insertion_sort.sort();
+    PmergeMe<IndexableList<int> > stdList;
+    stdList.insertData(data);
+    stdList.sort();
     clock_t end = clock();
     double elapsedTime = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
     
     std::cout << "After: ";
-    merge_insertion_sort.print();
+    stdList.print();
 
     std::cout << std::fixed << "Time to process a range of " << data.size() << " elements with std::list  : " << elapsedTime << " us" << std::endl;
 
     start = clock();
-    PmergeMe<std::deque<int> > merge_insertion_sort2;
-    merge_insertion_sort2.insertData(data);
-    merge_insertion_sort2.sort();
+    PmergeMe<std::vector<int>> stdVector;
+    stdVector.insertData(data);
+    stdVector.sort();
+    end = clock();
+    elapsedTime = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
+
+    std::cout << "Time to process a range of " << data.size() << " elements with std::vector : " << elapsedTime << " us" << std::endl;
+
+    start = clock();
+    PmergeMe<std::deque<int> > stdDeque;
+    stdDeque.insertData(data);
+    stdDeque.sort();
     end = clock();
     elapsedTime = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
 
     std::cout << "Time to process a range of " << data.size() << " elements with std::deque : " << elapsedTime << " us" << std::endl;
-    
-
-    
+ 
     return 0;
 }

@@ -1,54 +1,22 @@
 #include "BitcoinExchange.hpp"
-#include <vector>
-#include <sstream>
+#include <queue>
 #include <iostream>
 
-std::vector<std::string> split(std::string str, char sep)
+std::queue<std::string> split(std::string str, std::string delimiter)
 {
-    std::istringstream iss(str);
-    std::string buffer;
+    std::queue<std::string> result;
+    size_t pos = 0;
+    std::string token;
 
-    std::vector<std::string> result;
-
-    while (std::getline(iss, buffer, sep))
-        result.push_back(buffer);
+    while ((pos = str.find(delimiter)) != std::string::npos)
+    {
+        token = str.substr(0, pos);
+        result.push(token);
+        str.erase(0, pos + delimiter.length());
+    }
+    if (str != "")
+        result.push(str);
     return (result);
-}
-
-bool is_leap_year(int year)
-{
-    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
-}
-
-bool is_valid_date(int year, int month, int day)
-{
-    if (month < 1 || month > 12)
-    {
-        return false;
-    }
-    if (day < 1)
-    {
-        return false;
-    }
-    if (month == 2)
-    {
-        if (is_leap_year(year))
-        {
-            return day <= 29;
-        }
-        else
-        {
-            return day <= 28;
-        }
-    }
-    else if (month == 4 || month == 6 || month == 9 || month == 11)
-    {
-        return day <= 30;
-    }
-    else
-    {
-        return day <= 31;
-    }
 }
 
 BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase)
@@ -60,62 +28,99 @@ BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase)
         getline(rawDatabase, date, ',');
         getline(rawDatabase, price, '\n');
         
-        std::vector<std::string> yearMonthDay = split(date, '-');
+        std::queue<std::string> yearMonthDay = split(date, "-");
         if (yearMonthDay.size() == 3)
         {
-            database[Date(std::atoi(yearMonthDay[0].c_str()), std::atoi(yearMonthDay[1].c_str()), std::atoi(yearMonthDay[2].c_str()))] = static_cast<float>(std::atof(price.c_str()));
+            int year = std::atoi(yearMonthDay.front().c_str());
+            yearMonthDay.pop();
+            int month = std::atoi(yearMonthDay.front().c_str());
+            yearMonthDay.pop();
+            int day = std::atoi(yearMonthDay.front().c_str());
+            yearMonthDay.pop();
+            
+            database[Date(year, month, day)] = static_cast<float>(std::atof(price.c_str()));
         }
     }
 }
 
 BitcoinExchange::~BitcoinExchange() {}
 
+bool    isValidDateFormat(std::string date)
+{
+    for (std::string::iterator it = date.begin(); it != date.end(); ++it)
+    {
+        if (!std::isdigit(*it) && *it != '-')
+            return false;
+    }
+    return true;
+}
+
+bool    isValidValueFormat(std::string valueString, float value)
+{
+    if (value == 0 && valueString != "0")
+        return false;
+    return true;
+}
+
 void    BitcoinExchange::doExchange(std::string rawInput)
 {
-    if (rawInput.empty())
+    if (rawInput.empty() || rawInput == "date | value")
     {
         return ;
     }
-    std::vector<std::string> dateValue = split(rawInput, '|');
+
+    std::queue<std::string> dateValue = split(rawInput, " | ");
     if (dateValue.size() != 2)
     {
         std::cout << "Error: " << rawInput << " : Bad Input" << std::endl;
         return ;
     }
-    std::vector<std::string> date = split(dateValue[0], '-');
-    int year = -1;
-    int month = -1;
-    int day = -1;
-    float quantity = -1;
-    if (date.size() == 3)
+    if (!isValidDateFormat(dateValue.front()))
     {
-        year = std::atoi(date[0].c_str());
-        month = std::atoi(date[1].c_str());
-        day = std::atoi(date[2].c_str());
-        quantity = static_cast<float>(std::atof(dateValue[1].c_str()));
-    }
-    if (year == -1 && month == -1 && day == -1 && quantity == -1)
-    {
+        std::cout << "Error: " << dateValue.front() << " : Invalid Date Format" << std::endl;
         return ;
     }
-    Date targetDate(year, month, day);
-    if (!is_valid_date(year, month, day))
+
+    float quantity = static_cast<float>(std::atof(dateValue.back().c_str()));
+    if (!isValidValueFormat(dateValue.back(), quantity))
     {
-        std::cout << "Error: " << targetDate << ": Invalid Date" << std::endl;
+        std::cout << "Error: " << dateValue.back() << " : Invalid Value" << std::endl;
+        return;
     }
-    else if (quantity < 0)
+
+    std::queue<std::string> yearMonthDay = split(dateValue.front(), "-");
+    if (yearMonthDay.size() != 3)
     {
-        std::cout << "Error:" << quantity << ": Number must be positive" << std::endl;
+        std::cout << "Error: " << dateValue.front() << " : Bad Input" << std::endl;
+        return ;
+    }
+
+    int year = std::atoi(yearMonthDay.front().c_str());
+    yearMonthDay.pop();
+    int month = std::atoi(yearMonthDay.front().c_str());
+    yearMonthDay.pop();
+    int day = std::atoi(yearMonthDay.front().c_str());
+    yearMonthDay.pop();
+
+    Date targetDate(year, month, day);
+    
+    if (!targetDate.isValidDate())
+    {
+        std::cout << "Error: " << targetDate << " : Invalid Date" << std::endl;
+    }
+    else if (quantity <= 0)
+    {
+        std::cout << "Error: " << quantity << " : Number must be positive" << std::endl;
     }
     else if (quantity > 1000)
     {
-        std::cout << "Error:" << quantity << ": Number too big" << std::endl;
+        std::cout << "Error: " << quantity << " : Number too big" << std::endl;
     }
     else
     {
         std::map<Date, float>::const_iterator price = database.upper_bound(targetDate);
         if (price != database.begin())
             --price;
-        std::cout << "Date: " << targetDate << "\nPrice: " << price->second << " Quantity: " << quantity << " => " << price->second * quantity << std::endl;
+        std::cout << targetDate << " => " << price->second << " * " << quantity << " = " << price->second * quantity << std::endl;
     }
 }

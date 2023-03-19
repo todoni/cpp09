@@ -8,23 +8,26 @@ class Date
 public:
     Date(int year, int month, int day);
     Date(const Date& other);
-    ~Date() {}
+    ~Date();
+    Date& operator=(const Date& ohter);
 
     bool operator<(const Date &other) const;
     bool operator==(const Date &other) const;
     bool operator!=(const Date &other) const;
 
-    int year() const { return _year; }
-    int month() const { return _month; }
-    int day() const { return _day; }
+    int year() const;
+    int month() const;
+    int day() const;
+
+    bool isValidDate() const;
 
 private:
     int _year;
     int _month;
     int _day;
-
+    
     Date();
-    Date& operator=(const Date& ohter);
+
 };
 
 std::ostream& operator<<(std::ostream& out, const Date& date);
