@@ -29,6 +29,8 @@ int main(int argc, char **argv)
 
         while (std::getline(iss, buffer, ' '))
         {
+            if (buffer == "")
+                continue;
             int value = std::atoi(buffer.c_str());
             if (value < 0 || numToString(value) != buffer)
             {
