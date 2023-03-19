@@ -32,71 +32,82 @@ public:
 private: 
     PmergeMe(const PmergeMe& other);
     PmergeMe& operator=(const PmergeMe& other);
-    void mergeInsertionSort(long left, long right)
+    void mergeInsertionSort(long start, long end)
     {
-        if (left >= right)
+        if (start >= end)
         {
             return;
         }
 
-        if (right - left + 1 <= 10)
+        if (end - start + 1 <= 10)
         {
-            insertionSort(left, right);
+            insertionSort(start, end);
             return;
         }
 
-        long mid = left + (right - left) / 2;
+        long mid = start + (end - start) / 2;
 
-        mergeInsertionSort(left, mid);
-        mergeInsertionSort(mid + 1, right);
-        merge(left, mid, right);
+        mergeInsertionSort(start, mid);
+        mergeInsertionSort(mid + 1, end);
+        merge(start, mid, end);
     }
 
-    void merge(long left, long mid, long right)
+    void merge(long start, long mid, long end)
     {
-        Container temp_container(right - left + 1);
+        Container sorted(end - start + 1);
 
-        long i = left, j = mid + 1, k = 0;
+        long i, j, k;
 
-        while (i <= mid && j <= right)
+        i = start;
+        j = mid + 1;
+        k = 0;
+
+        while (i <= mid && j <= end)
         {
             if (container[i] <= container[j])
             {
-                temp_container[k++] = container[i++];
+                sorted[k] = container[i];
+                ++i;
             }
             else
             {
-                temp_container[k++] = container[j++];
+                sorted[k] = container[j];
+                ++j;
             }
+            ++k;
         }
 
         while (i <= mid)
         {
-            temp_container[k++] = container[i++];
+            sorted[k] = container[i];
+            ++k;
+            ++i;
         }
 
-        while (j <= right)
+        while (j <= end)
         {
-            temp_container[k++] = container[j++];
+            sorted[k] = container[j];
+            ++k;
+            ++j;
         }
 
-        for (long i = left, k = 0; i <= right; i++, k++)
+        for (long i = start, k = 0; i <= end; i++, k++)
         {
-            container[i] = temp_container[k];
+            container[i] = sorted[k];
         }
     }
 
-    void insertionSort(long left, long right)
+    void insertionSort(long start, long end)
     {
-        for (long i = left + 1; i <= right; i++)
+        for (long i = start + 1; i <= end; i++)
         {
             int key = container[i];
             long j = i - 1;
 
-            while (j >= left && container[j] > key)
+            while (j >= start && container[j] > key)
             {
                 container[j + 1] = container[j];
-                j--;
+                --j;
             }
 
             container[j + 1] = key;
