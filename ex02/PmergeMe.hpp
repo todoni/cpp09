@@ -7,6 +7,9 @@
 template <typename Container>
 class PmergeMe
 {
+private:
+    Container container;
+
 public:
     void sort()
     {
@@ -29,23 +32,17 @@ public:
 
     PmergeMe() {}
     ~PmergeMe() {}
+
 private: 
-    PmergeMe(const PmergeMe& other);
-    PmergeMe& operator=(const PmergeMe& other);
     void mergeInsertionSort(long start, long end)
     {
-        if (start >= end)
-        {
-            return;
-        }
-
-        if (end - start + 1 <= 10)
+        if (end - start + 1 <= 32)
         {
             insertionSort(start, end);
             return;
         }
 
-        long mid = start + (end - start) / 2;
+        long mid = (end + start) / 2;
 
         mergeInsertionSort(start, mid);
         mergeInsertionSort(mid + 1, end);
@@ -113,8 +110,9 @@ private:
             container[j + 1] = key;
         }
     }
-private:
-    Container container;
+    
+    PmergeMe(const PmergeMe& other);
+    PmergeMe& operator=(const PmergeMe& other);
 };
 
 #endif

@@ -2,6 +2,7 @@
 # define INDEXABLELIST_HPP
 
 # include <list>
+# include <iterator>
 
 template <typename T>
 class IndexableList : public std::list<T>
