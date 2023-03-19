@@ -14,7 +14,6 @@ std::string numToString(int num)
 
 int main(int argc, char **argv)
 {
-    std::cout << argc << std::endl;
     if (argc < 2)
     {
         std::cout << "Usage: ./PmergeMe [Integer Sequence]" << std::endl;
@@ -58,16 +57,16 @@ int main(int argc, char **argv)
     std::cout << "After: ";
     stdList.print();
 
-    std::cout << std::fixed << "Time to process a range of " << data.size() << " elements with std::list  : " << elapsedTime << " us" << std::endl;
+    std::cout << "Time to process a range of " << data.size() << " elements with std::list   : " << elapsedTime << " us => " << elapsedTime / 1000000.0  << "s" << std::endl;
 
     start = clock();
-    PmergeMe<std::vector<int>> stdVector;
+    PmergeMe<std::vector<int> > stdVector;
     stdVector.insertData(data);
     stdVector.sort();
     end = clock();
     elapsedTime = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
 
-    std::cout << "Time to process a range of " << data.size() << " elements with std::vector : " << elapsedTime << " us" << std::endl;
+    std::cout << "Time to process a range of " << data.size() << " elements with std::vector : " << elapsedTime << " us => " << elapsedTime / 1000000.0 << "s" << std::endl;
 
     start = clock();
     PmergeMe<std::deque<int> > stdDeque;
@@ -76,7 +75,7 @@ int main(int argc, char **argv)
     end = clock();
     elapsedTime = static_cast<double>(end - start) / CLOCKS_PER_SEC * 1000000.0;
 
-    std::cout << "Time to process a range of " << data.size() << " elements with std::deque : " << elapsedTime << " us" << std::endl;
- 
+    std::cout << "Time to process a range of " << data.size() << " elements with std::deque  : " << elapsedTime << " us => " << elapsedTime / 1000000.0 << "s" << std::endl;
+
     return 0;
 }
