@@ -2,8 +2,6 @@
 # define PMERGEME_HPP
 
 # include <iostream>
-# include <sstream>
-# include <string>
 # include <deque>
 
 template <typename Container>
@@ -34,7 +32,7 @@ public:
 private: 
     PmergeMe(const PmergeMe& other);
     PmergeMe& operator=(const PmergeMe& other);
-    void mergeInsertionSort(int left, int right)
+    void mergeInsertionSort(long left, long right)
     {
         if (left >= right)
         {
@@ -47,18 +45,18 @@ private:
             return;
         }
 
-        int mid = left + (right - left) / 2;
+        long mid = left + (right - left) / 2;
 
         mergeInsertionSort(left, mid);
         mergeInsertionSort(mid + 1, right);
         merge(left, mid, right);
     }
 
-    void merge(int left, int mid, int right)
+    void merge(long left, long mid, long right)
     {
         Container temp_container(right - left + 1);
 
-        int i = left, j = mid + 1, k = 0;
+        long i = left, j = mid + 1, k = 0;
 
         while (i <= mid && j <= right)
         {
@@ -82,18 +80,18 @@ private:
             temp_container[k++] = container[j++];
         }
 
-        for (int i = left, k = 0; i <= right; i++, k++)
+        for (long i = left, k = 0; i <= right; i++, k++)
         {
             container[i] = temp_container[k];
         }
     }
 
-    void insertionSort(int left, int right)
+    void insertionSort(long left, long right)
     {
-        for (int i = left + 1; i <= right; i++)
+        for (long i = left + 1; i <= right; i++)
         {
             int key = container[i];
-            int j = i - 1;
+            long j = i - 1;
 
             while (j >= left && container[j] > key)
             {

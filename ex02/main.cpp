@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <vector>
+#include <sstream>
 #include <time.h>
 
 std::string numToString(int num)
