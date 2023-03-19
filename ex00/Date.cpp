@@ -42,17 +42,6 @@ bool Date::isValidDate() const
     }
 }
 
-Date& Date::operator=(const Date& other)
-{
-    if (this != &other)
-    {
-        _year = other._year;
-        _month = other._month;
-        _day = other._day;
-    }
-    return (*this);
-}
-
 bool Date::operator<(const Date &other) const
 {
     if (_year != other._year)

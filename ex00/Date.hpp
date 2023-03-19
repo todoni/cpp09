@@ -9,7 +9,6 @@ public:
     Date(int year, int month, int day);
     Date(const Date& other);
     ~Date();
-    Date& operator=(const Date& ohter);
 
     bool operator<(const Date &other) const;
     bool operator==(const Date &other) const;
@@ -27,6 +26,7 @@ private:
     int _day;
     
     Date();
+    Date& operator=(const Date& ohter);
 
 };
 
