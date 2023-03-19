@@ -20,7 +20,6 @@ private:
 public:
     ~BitcoinExchange();
     BitcoinExchange(std::ifstream& rawDatabase);
-    float getExchangeRateOftheday(Date date);
     void doExchange(std::string rawInput);
 
 };
