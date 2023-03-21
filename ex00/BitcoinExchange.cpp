@@ -1,6 +1,24 @@
 #include "BitcoinExchange.hpp"
+#include "color.hpp"
 #include <queue>
 #include <iostream>
+
+std::string& ltrim(std::string &s, const std::string& t = " \t\n\r\f\v")
+{
+    s.erase(0, s.find_first_not_of(t));
+    return s;
+}
+
+std::string& rtrim(std::string &s, const std::string& t = " \t\n\r\f\v")
+{
+    s.erase(s.find_last_not_of(t) + 1);
+    return s;
+}
+
+std::string& trim(std::string &s, const std::string& t = " \t\n\r\f\v")
+{
+    return ltrim(rtrim(s, t), t);
+}
 
 std::queue<std::string> split(std::string str, std::string delimiter)
 {
@@ -15,19 +33,21 @@ std::queue<std::string> split(std::string str, std::string delimiter)
         str.erase(0, pos + delimiter.length());
     }
     if (str != "")
-        result.push(str);
+        result.push(trim(str));
     return (result);
 }
 
 BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase)
 {
-    while (!rawDatabase.eof())
+    std::string date;
+    std::string price;
+    while (std::getline(rawDatabase, date, ',') && std::getline(rawDatabase, price, '\n'))
     {
-        std::string date;
-        std::string price;
-        getline(rawDatabase, date, ',');
-        getline(rawDatabase, price, '\n');
-        
+        if (rawDatabase.fail())
+        {
+            std::cout << "Error while read DB file" << std::endl;
+            break;
+        }
         std::queue<std::string> yearMonthDay = split(date, "-");
         if (yearMonthDay.size() == 3)
         {
@@ -45,23 +65,6 @@ BitcoinExchange::BitcoinExchange(std::ifstream& rawDatabase)
 
 BitcoinExchange::~BitcoinExchange() {}
 
-bool    isValidDateFormat(std::string date)
-{
-    for (std::string::iterator it = date.begin(); it != date.end(); ++it)
-    {
-        if (!std::isdigit(*it) && *it != '-')
-            return false;
-    }
-    return true;
-}
-
-bool    isValidValueFormat(std::string valueString, float value)
-{
-    if (value == 0 && valueString != "0")
-        return false;
-    return true;
-}
-
 void    BitcoinExchange::doExchange(std::string rawInput)
 {
     if (rawInput.empty() || rawInput == "date | value")
@@ -75,18 +78,6 @@ void    BitcoinExchange::doExchange(std::string rawInput)
         std::cout << "Error: " << rawInput << " : Bad Input" << std::endl;
         return ;
     }
-    if (!isValidDateFormat(dateValue.front()))
-    {
-        std::cout << "Error: " << dateValue.front() << " : Invalid Date Format" << std::endl;
-        return ;
-    }
-
-    float quantity = static_cast<float>(std::atof(dateValue.back().c_str()));
-    if (!isValidValueFormat(dateValue.back(), quantity))
-    {
-        std::cout << "Error: " << dateValue.back() << " : Invalid Value" << std::endl;
-        return;
-    }
 
     std::queue<std::string> yearMonthDay = split(dateValue.front(), "-");
     if (yearMonthDay.size() != 3)
@@ -94,6 +85,8 @@ void    BitcoinExchange::doExchange(std::string rawInput)
         std::cout << "Error: " << dateValue.front() << " : Bad Input" << std::endl;
         return ;
     }
+    
+    float quantity = static_cast<float>(std::atof(dateValue.back().c_str()));
 
     int year = std::atoi(yearMonthDay.front().c_str());
     yearMonthDay.pop();
@@ -106,13 +99,17 @@ void    BitcoinExchange::doExchange(std::string rawInput)
     
     if (!targetDate.isValidDate())
     {
-        std::cout << "Error: " << targetDate << " : Invalid Date" << std::endl;
+        std::cout << "Error: " << dateValue.front() << " : Invalid Date" << std::endl;
     }
-    else if (quantity <= 0)
+    else if (quantity == 0)
+    {
+        std::cout << "Error: " << dateValue.back() << " : Invalid value" << std::endl;
+    }
+    else if (quantity < 0)
     {
         std::cout << "Error: " << quantity << " : Number must be positive" << std::endl;
     }
-    else if (quantity > 1000)
+    else if (quantity >= 1000)
     {
         std::cout << "Error: " << quantity << " : Number too big" << std::endl;
     }
@@ -121,6 +118,6 @@ void    BitcoinExchange::doExchange(std::string rawInput)
         std::map<Date, float>::const_iterator price = database.upper_bound(targetDate);
         if (price != database.begin())
             --price;
-        std::cout << targetDate << " => " << price->second << " * " << quantity << " = " << price->second * quantity << std::endl;
+        std::cout << targetDate << " => " << YELLOW << price->second << END << " * " << YELLOW << quantity << END << " = " << price->second * quantity << "💰" << END << std::endl;
     }
 }

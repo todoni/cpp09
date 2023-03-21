@@ -7,10 +7,11 @@
 
 # include "Date.hpp"
 
-typedef std::map<Date, float> data;
 
 class   BitcoinExchange
 {
+typedef std::map<Date, float> data;
+
 private:
     data database;
     BitcoinExchange();

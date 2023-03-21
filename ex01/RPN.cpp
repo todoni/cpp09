@@ -45,7 +45,7 @@ long RPN::calculate(std::string expression)
         }
         else if (*token == ' ')
         {
-
+            continue;
         }
         else
         {
